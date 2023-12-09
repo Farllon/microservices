@@ -1,12 +1,8 @@
-using Catalog.API.Data;
-using Catalog.API.Endpoints;
-using Microsoft.EntityFrameworkCore;
+using Discount.Infra.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
-
+builder.Services.AddInfra(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -17,7 +13,5 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.MapProducts();
 
 app.Run();

@@ -1,6 +1,7 @@
 using Basket.API.Extensions;
 using Basket.API.Models;
 using Basket.API.Requests;
+using Basket.Contracts.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 
@@ -11,8 +12,8 @@ public static class BasketEndpoint
     public static IEndpointRouteBuilder MapBasket(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("basket")
-            .WithTags("Basket");
+            .MapGroup("baskets")
+            .WithTags("Baskets");
 
         group
             .MapGet("{userId}", async (
@@ -34,10 +35,19 @@ public static class BasketEndpoint
                 else
                     basket = hash.ToObject<Models.Basket>();
 
-                return Results.Ok(basket);
+                return Results.Ok(new BasketDTO
+                {
+                    UserId = basket.UserId,
+                    Items = basket.Items
+                        .Select(item => new BasketItemDTO(
+                            item.ProductId, 
+                            item.Name, 
+                            item.Price, 
+                            item.Quantity))
+                });
             })
             .WithName("BetById")
-            .Produces<Models.Basket>();
+            .Produces<BasketDTO>();
         
         group
             .MapPost("{userId}/items", async (
@@ -68,6 +78,20 @@ public static class BasketEndpoint
             })
             .WithName("AddItem")
             .Produces<Models.Basket>();
+
+        group.MapDelete("{userId}", async (
+            [FromRoute] Guid userId,
+            [FromServices] IDatabase database) =>
+        {
+            var hash = await database.HashGetAllAsync(userId.ToString());
+
+            if (hash.Length == 0)
+                return Results.NotFound();
+
+            await database.KeyDeleteAsync(userId.ToString());
+
+            return Results.NoContent();
+        });
         
         group
             .MapDelete("{userId}/items/{productId}", async (

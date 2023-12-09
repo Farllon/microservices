@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "Checkout.API";
+
+package discount;
+
+service Discounter {
+  rpc GetDiscount (GetDiscountRequest) returns (GetDiscountReply);
+  rpc GrabCupons (GrabCuponsRequest) returns (GrabCuponsReply);
+}
+
+message GetDiscountRequest {
+  string userId = 1;
+  repeated string cupons = 2;
+}
+
+message GetDiscountReply {
+  float percent = 1;
+}
+
+message GrabCuponsRequest {
+  string userId = 1;
+  repeated string cupons = 2;
+}
+
+message GrabCuponsReply { }

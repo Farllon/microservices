@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using Catalog.API.Data;
-using Catalog.API.EndpointFilters;
 using Catalog.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +37,7 @@ public static class ProductEndpoint
 
         group
             .MapPost("/", async (
-                [FromBody] Product product, 
+                [FromBody] Product product,
                 [FromServices] ApplicationDbContext context,
                 CancellationToken cancellationToken) =>
             {
@@ -47,13 +46,12 @@ public static class ProductEndpoint
                 await context.SaveChangesAsync(cancellationToken);
 
                 return Results.CreatedAtRoute(
-                    "GetById", 
-                    new() {{"id", created.Entity.Id}},
+                    "GetById",
+                    new() { { "id", created.Entity.Id } },
                     created.Entity);
             })
             .WithName("Create")
-            .Produces<Product>(StatusCodes.Status201Created)
-            .AddEndpointFilter<ValidationEndpointFilter<Product>>();
+            .Produces<Product>(StatusCodes.Status201Created);
 
         group
             .MapGet("{id}", async (
@@ -81,7 +79,7 @@ public static class ProductEndpoint
                 CancellationToken cancellationToken) =>
             {
                 var found = await context.Products.FindAsync(
-                    keyValues: new object[] { id }, 
+                    keyValues: new object[] { id },
                     cancellationToken: cancellationToken);
 
                 if (found is null)
@@ -98,8 +96,7 @@ public static class ProductEndpoint
             })
             .WithName("Update")
             .Produces<Product>()
-            .Produces(StatusCodes.Status404NotFound)
-            .AddEndpointFilter<ValidationEndpointFilter<Product>>();
+            .Produces(StatusCodes.Status404NotFound);
 
         group
             .MapDelete("{id}", async (
