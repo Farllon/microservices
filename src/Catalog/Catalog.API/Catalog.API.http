@@ -1,0 +1,37 @@
+@host = localhost
+@port = 5222
+@protocol = http
+@hostname = {{protocol}}://{{host}}:{{port}}
+
+### Get products
+GET {{hostname}}/products?page=1&limit=15
+
+### Create Product
+POST {{hostname}}/products
+Content-Type: application/json
+
+{
+  "name": "{{$random.alphabetic(11)}}",
+  "description": "{{$random.alphabetic(120)}}",
+  "price": {{$random.float(25, 999)}},
+  "available": true
+}
+
+> {% client.global.set("productId", response.body.id) %}
+
+### Get product by id
+GET {{hostname}}/products/{{productId}}
+
+### Edit product
+PUT {{hostname}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "string",
+  "description": "string",
+  "price": {{$random.float(1, 99)}},
+  "available": true
+}
+
+### Delete product
+DELETE {{hostname}}/products/{{productId}}
